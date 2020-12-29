@@ -1,5 +1,8 @@
-
+use rufy_core::Rufy;
 
 fn main() {
-    println!("Hello, world!");
+    match Rufy::new(String::from("project")) {
+        Err(err) => println!("Err: {:?}", err),
+        _ => {},
+    }
 }
