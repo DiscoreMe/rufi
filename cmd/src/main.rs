@@ -1,8 +1,6 @@
 use rufy_core::Rufy;
 
 fn main() {
-    match Rufy::new(String::from("project")) {
-        Err(err) => println!("Err: {:?}", err),
-        _ => {},
-    }
+    let rufy = Rufy::new(String::from("project")).unwrap();
+    rufy.run();
 }

@@ -1,6 +1,5 @@
-use std::io::Result;
-
 use super::lua::VM;
+use crate::result::Result;
 
 pub struct Rufy {
     vm: VM,
@@ -14,6 +13,13 @@ impl Rufy {
         Ok(Rufy {
             vm,
         })
+    }
+
+    pub fn run(&self) {
+        match self.vm.run() {
+            Err(e) => println!("Error: {:?}", e),
+            _ => {}
+        }
     }
 }
 
