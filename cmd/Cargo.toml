@@ -1,0 +1,19 @@
+[package]
+name = "cmd"
+version = "0.0.1"
+authors = ["Nikita <nikitadiscore@gmail.com>"]
+edition = "2018"
+repository = "https://github.com/DiscoreMe/rufy"
+default-run = "rufy"
+
+[[bin]]
+name = "rufy"
+path = "src/main.rs"
+
+[dependencies]
+"rufy_core" = { path = "../rufy_core" }
+
+[package.metadata.winres]
+OriginalFilename = "rufy.exe"
+ProductName = "Rufy"
+FileDescription = "2d game engine."
