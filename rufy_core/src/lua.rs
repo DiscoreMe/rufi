@@ -2,13 +2,11 @@ use std::io::{Result as IOResult, Read};
 use std::fs::File as File;
 use std::path::Path;
 
+use walkdir::{WalkDir, DirEntry};
+
 use crate::Result;
 
-use rlua::{
-    Lua,
-    Result as LuaResult,
-    Function,
-};
+use rlua::{Lua, Result as LuaResult, Function, Table};
 use rlua::prelude::LuaError;
 
 pub struct VM {
@@ -25,7 +23,7 @@ impl VM {
     }
 
     pub fn init(&self) -> Result<()> {
-        self.load_file("main.lua")?;
+        self.load_files()?;
         Ok(())
     }
 
@@ -36,9 +34,31 @@ impl VM {
         file.read_to_string(&mut content).unwrap();
 
         self.lua.context(|ctx| {
-            ctx.load(content.as_str()).exec()?;
+            ctx.load(content.as_str()).set_name(filepath)?.exec()?;
             Ok(())
         })?;
+
+        Ok(())
+    }
+
+    fn load_files(&self) -> IOResult<()> {
+        for entry in WalkDir::new(Path::new(self.dir.as_str())) {
+            let entry: DirEntry = entry?;
+            if !entry.file_type().is_dir() {
+                let filename: &Path  = entry.file_name().as_ref();
+                let mut file = "";
+                match filename.to_str() {
+                    None => eprintln!("Error load file: {:#?}", file),
+                    Some(f) => file = f,
+                }
+                let file = str::replace(file, "", "");
+
+                match self.load_file(file.as_str()) {
+                    Err(err) => eprintln!("Error load file: {:#?}: {:#?}", file, err),
+                    _ => {},
+                }
+            }
+        }
 
         Ok(())
     }
@@ -48,9 +68,11 @@ impl VM {
             let global = ctx.globals();
             let init_function: Function = global.get("onInit")?;
             init_function.call::<_, ()>(())?;
+
             Ok(())
         })?;
 
         Ok(())
     }
 }
+
