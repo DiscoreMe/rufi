@@ -4,10 +4,9 @@ use std::path::Path;
 
 use walkdir::{WalkDir, DirEntry};
 
-use crate::Result;
+use rlua::{Lua, Result as LuaResult, Function};
 
-use rlua::{Lua, Result as LuaResult, Function, Table};
-use rlua::prelude::LuaError;
+use crate::{Error, Result};
 
 pub struct VM {
     lua: Lua,
@@ -22,13 +21,12 @@ impl VM {
         }
     }
 
-    pub fn init(&self) -> Result<()> {
+    pub fn init(&self) -> Result<(), Error> {
         self.load_files()?;
         Ok(())
     }
 
     pub fn load_file(&self, filepath: &str) -> LuaResult<()> {
-        // todo: implement custom error to support LuaResult and IOResult
         let mut file = File::open(Path::new(self.dir.as_str()).join(filepath)).unwrap();
         let mut content = String::new();
         file.read_to_string(&mut content).unwrap();
@@ -46,17 +44,9 @@ impl VM {
             let entry: DirEntry = entry?;
             if !entry.file_type().is_dir() {
                 let filename: &Path  = entry.file_name().as_ref();
-                let mut file = "";
-                match filename.to_str() {
-                    None => eprintln!("Error load file: {:#?}", file),
-                    Some(f) => file = f,
-                }
-                let file = str::replace(file, "", "");
-
-                match self.load_file(file.as_str()) {
-                    Err(err) => eprintln!("Error load file: {:#?}: {:#?}", file, err),
-                    _ => {},
-                }
+                let file = filename.to_str().unwrap();
+                // todo make error handler
+                self.load_file(str::replace(file, "", "").as_str()).unwrap();
             }
         }
 

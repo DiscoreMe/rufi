@@ -1,6 +1,13 @@
-use rufy_core::Rufy;
+use rufy_core::{
+    Rufy,
+    Result,
+    Error,
+};
+use rufy_engine::Engine;
 
-fn main() {
-    let rufy = Rufy::new(String::from("project")).unwrap();
-    rufy.run();
+fn main() -> Result<(), Error> {
+    let engine = Engine::new();
+    engine.init();
+    let rufy = Rufy::new(String::from("project"))?;
+    rufy.run()
 }

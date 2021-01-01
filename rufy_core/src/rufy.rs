@@ -1,12 +1,15 @@
 use super::lua::VM;
-use crate::result::Result;
+use crate::error::{
+    Result,
+    Error
+};
 
 pub struct Rufy {
     vm: VM,
 }
 
 impl Rufy {
-    pub fn new(path: String) -> Result<Rufy> {
+    pub fn new(path: String) -> Result<Rufy, Error> {
         let vm = VM::new(path.clone());
         vm.init()?;
 
@@ -15,11 +18,9 @@ impl Rufy {
         })
     }
 
-    pub fn run(&self) {
-        match self.vm.run() {
-            Err(e) => println!("Error: {:?}", e),
-            _ => {}
-        }
+    pub fn run(&self) -> Result<(), Error>{
+        self.vm.run()?;
+        Ok(())
     }
 }
 

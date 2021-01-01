@@ -1,6 +1,6 @@
 mod lua;
 mod rufy;
-mod result;
+mod error;
 
 pub use rufy::*;
-pub use result::*;
+pub use error::*;
