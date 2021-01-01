@@ -1,0 +1,8 @@
+[package]
+name = "rufy_engine"
+version = "0.1.0"
+authors = ["Nikita <nikitadiscore@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+sdl2 = "0.34.3"
