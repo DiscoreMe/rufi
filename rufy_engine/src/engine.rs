@@ -4,15 +4,21 @@ use sdl2::pixels::Color;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use std::time::Duration;
+use std::thread;
+
+use rufy_core::{
+    Sender,
+    Receiver,
+};
 
 pub struct Engine {
-
+    recipient: Option<Receiver>,
 }
 
 impl Engine {
     pub fn new() -> Engine {
         Engine {
-
+            recipient: None,
         }
     }
 
@@ -48,6 +54,25 @@ impl Engine {
 
             canvas.present();
             ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
+        }
+    }
+
+    pub fn init_signal(&mut self) -> rufy_core::Sender {
+        let (sx, mut rx) = rufy_core::create_channel();
+        self.recipient = Some(rx);
+        sx
+    }
+
+    pub async fn listen_signal(self) {
+        match self.recipient {
+            None => println!("listen signal is none"),
+            Some(mut rc) => {
+                tokio::spawn(async move {
+                    while let Some(msg) = rc.recv().await {
+                        println!("GOT = {}", msg);
+                    }
+                });
+            },
         }
     }
 }

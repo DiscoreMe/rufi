@@ -5,4 +5,6 @@ authors = ["Nikita <nikitadiscore@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+"rufy_core" = { path = "../rufy_core" }
+tokio = { version = "1", features = ["rt"] }
 sdl2 = "0.34.3"

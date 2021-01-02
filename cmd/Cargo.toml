@@ -13,6 +13,7 @@ path = "src/main.rs"
 [dependencies]
 "rufy_core" = { path = "../rufy_core" }
 "rufy_engine" = { path = "../rufy_engine" }
+tokio = { version = "1", features = ["full"] } # feature for tokio::main? features = ["rt", "tokio-macros", and .. ]?
 
 [package.metadata.winres]
 OriginalFilename = "rufy.exe"
