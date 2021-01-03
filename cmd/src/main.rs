@@ -3,6 +3,8 @@ use std::path::Path;
 use std::fs::File;
 use std::io::Write;
 
+use rufy_core::Rufy;
+
 fn main() {
     if !Path::new("project").exists() {
         create_dir_all("project").unwrap();

@@ -1,8 +1,8 @@
-use super::lua::VM;
+use std::thread;
 
+use super::lua::VM;
 use crate::channel::{
     Sender,
-    Receiver,
     create_channel,
 };
 use crate::engine::Engine;
@@ -10,10 +10,7 @@ use crate::engine::Engine;
 pub struct Rufy {
     vm: VM,
     sender: Option<Sender>,
-    engine: Option<Engine>,
 }
-
-use std::thread;
 
 impl Rufy {
     pub fn init(path: String) {
@@ -24,7 +21,6 @@ impl Rufy {
         let mut rufy = Rufy {
             vm,
             sender: None,
-            engine: None,
         };
         rufy.run();
     }
@@ -33,13 +29,12 @@ impl Rufy {
         let (sx, rx) = create_channel();
         self.sender = Some(sx.clone());
 
-        let engine = Engine::init(sx.clone());
-        self.engine = Some(engine);
-        let engine_clone = self.engine.clone().unwrap();
-
         thread::spawn(move || {
-            engine_clone.init_sdl();
+            let mut engine = Engine::init();
+            engine.init_sdl();
         });
+
+        sx.send("Init signal recv".parse().unwrap()).unwrap();
 
         loop {
             while let Ok(message) = rx.try_recv() {

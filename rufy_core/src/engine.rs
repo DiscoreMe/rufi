@@ -5,26 +5,21 @@ use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use std::time::Duration;
 
-use crate::channel::{
-    Sender,
-};
-
 #[derive(Clone)]
 pub struct Engine {
-    sender: Sender,
+    context: Option<sdl2::Sdl>,
 }
 
-
 impl Engine {
-    pub fn init(sender: Sender) -> Engine {
+    pub fn init() -> Engine {
         Engine {
-            sender,
+            context: None,
         }
     }
 
-    pub fn init_sdl(&self) {
-        let sdl_context = sdl2::init().unwrap();
-        let video_subsystem = sdl_context.video().unwrap();
+    pub fn init_sdl(&mut self) {
+        let context = sdl2::init().unwrap();
+        let video_subsystem = context.video().unwrap();
 
         let window = video_subsystem.window("rufy", 800, 600)
             .position_centered()
@@ -36,12 +31,9 @@ impl Engine {
         canvas.set_draw_color(Color::RGB(0, 255, 255));
         canvas.clear();
         canvas.present();
-        let mut event_pump = sdl_context.event_pump().unwrap();
-        let mut i = 0;
+
+        let mut event_pump = context.event_pump().unwrap();
         'running: loop {
-            i = (i + 1) % 255;
-            canvas.set_draw_color(Color::RGB(i, 64, 255 - i));
-            canvas.clear();
             for event in event_pump.poll_iter() {
                 match event {
                     Event::Quit {..} |
@@ -57,17 +49,4 @@ impl Engine {
             ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
         }
     }
-
-    // pub async fn listen_signal(&'a self) {
-    //     match self.recipient.as_ref() {
-    //         None => println!("listen signal is none"),
-    //         Some(mut rc) => {
-    //             tokio::spawn(async move {
-    //                 while let Some(msg) = rc.recv().await {
-    //                     println!("GOT = {}", msg);
-    //                 }
-    //             });
-    //         },
-    //     }
-    // }
 }
