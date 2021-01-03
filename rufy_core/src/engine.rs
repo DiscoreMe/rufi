@@ -4,25 +4,25 @@ use sdl2::pixels::Color;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use std::time::Duration;
-use std::thread;
 
-use rufy_core::{
+use crate::channel::{
     Sender,
-    Receiver,
 };
 
+#[derive(Clone)]
 pub struct Engine {
-    recipient: Option<Receiver>,
+    sender: Sender,
 }
 
+
 impl Engine {
-    pub fn new() -> Engine {
+    pub fn init(sender: Sender) -> Engine {
         Engine {
-            recipient: None,
+            sender,
         }
     }
 
-    pub fn init(&self) {
+    pub fn init_sdl(&self) {
         let sdl_context = sdl2::init().unwrap();
         let video_subsystem = sdl_context.video().unwrap();
 
@@ -45,6 +45,7 @@ impl Engine {
             for event in event_pump.poll_iter() {
                 match event {
                     Event::Quit {..} |
+
                     Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
                         break 'running
                     },
@@ -57,22 +58,16 @@ impl Engine {
         }
     }
 
-    pub fn init_signal(&mut self) -> rufy_core::Sender {
-        let (sx, mut rx) = rufy_core::create_channel();
-        self.recipient = Some(rx);
-        sx
-    }
-
-    pub async fn listen_signal(self) {
-        match self.recipient {
-            None => println!("listen signal is none"),
-            Some(mut rc) => {
-                tokio::spawn(async move {
-                    while let Some(msg) = rc.recv().await {
-                        println!("GOT = {}", msg);
-                    }
-                });
-            },
-        }
-    }
+    // pub async fn listen_signal(&'a self) {
+    //     match self.recipient.as_ref() {
+    //         None => println!("listen signal is none"),
+    //         Some(mut rc) => {
+    //             tokio::spawn(async move {
+    //                 while let Some(msg) = rc.recv().await {
+    //                     println!("GOT = {}", msg);
+    //                 }
+    //             });
+    //         },
+    //     }
+    // }
 }

@@ -1,53 +1,51 @@
 use super::lua::VM;
-use crate::error::{
-    Result,
-    Error
-};
 
 use crate::channel::{
     Sender,
     Receiver,
     create_channel,
 };
-
+use crate::engine::Engine;
 
 pub struct Rufy {
     vm: VM,
-    recipient: Option<Receiver>,
+    sender: Option<Sender>,
+    engine: Option<Engine>,
 }
 
+use std::thread;
+
 impl Rufy {
-    pub fn new(path: String) -> Result<Rufy, Error> {
+    pub fn init(path: String) {
         let vm = VM::new(path.clone());
-        vm.init()?;
+        vm.init().unwrap();
+        vm.run().unwrap();
 
-        Ok(Rufy {
+        let mut rufy = Rufy {
             vm,
-            recipient: None,
-        })
+            sender: None,
+            engine: None,
+        };
+        rufy.run();
     }
 
-    pub fn run(&self) -> Result<(), Error>{
-        self.vm.run()?;
-        Ok(())
-    }
+    pub fn run(&mut self) {
+        let (sx, rx) = create_channel();
+        self.sender = Some(sx.clone());
 
-    pub fn init_signal(&mut self) -> Sender {
-        let (sx, mut rx) = create_channel();
-        self.recipient = Some(rx);
-        sx
-    }
+        let engine = Engine::init(sx.clone());
+        self.engine = Some(engine);
+        let engine_clone = self.engine.clone().unwrap();
 
-    pub async fn listen_signal(self) {
-        match self.recipient {
-            None => println!("listen signal is none"),
-            Some(mut rc) => {
-                tokio::spawn(async move {
-                    while let Some(msg) = rc.recv().await {
-                        println!("GOT = {}", msg);
-                    }
-                });
-            },
+        thread::spawn(move || {
+            engine_clone.init_sdl();
+        });
+
+        loop {
+            while let Ok(message) = rx.try_recv() {
+                println!("GOT = {}", message);
+            }
+            std::thread::sleep(std::time::Duration::from_millis(10));
         }
     }
 }

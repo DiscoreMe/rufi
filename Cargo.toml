@@ -2,5 +2,4 @@
 members = [
     "cmd",
     "rufy_core",
-    "rufy_engine",
 ]

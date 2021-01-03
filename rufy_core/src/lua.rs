@@ -1,22 +1,13 @@
 use std::io::{Result as IOResult, Read};
 use std::fs::File as File;
 use std::path::Path;
-
 use walkdir::{WalkDir, DirEntry};
-
 use rlua::{Lua, Result as LuaResult, Function};
-
 use crate::{Error, Result};
-
-use crate::channel::{
-    Receiver,
-    create_channel,
-};
 
 pub struct VM {
     lua: Lua,
     dir: String,
-    recipient: Option<Receiver>
 }
 
 impl VM {
@@ -24,7 +15,6 @@ impl VM {
         VM {
             lua: Lua::new(),
             dir: dir.clone(),
-            recipient: None,
         }
     }
 
